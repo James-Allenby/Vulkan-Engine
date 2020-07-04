@@ -3,7 +3,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "Prevented in-tree build. Please specify another directory outside of the source root.")
 endif()
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(Vulkan-Engine VERSION 0.1.0 LANGUAGES CXX)
 
 message(NOTICE "----------------------")
@@ -21,15 +21,23 @@ find_package(SDL2 REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set compile flags
+if(MSVC)
+  add_compile_options(/W4 /WX)
+else()
+  add_compile_options(-Wall -Wpedantic -Werror)
+endif()
+
 configure_file(${PROJECT_SOURCE_DIR}/Include/Config.hpp.in Config.hpp @ONLY)
 
-add_executable(vulkan-engine
-  Source/Main.cpp
-  Source/Application.cpp)
+set(SOURCE_FILES Source/Main.cpp Source/Application.cpp)
+set(INCLUDE_FILES Include/Application.hpp)
 
-target_link_libraries(vulkan-engine Vulkan::Vulkan)
-target_link_libraries(vulkan-engine SDL2::SDL2-static)
+add_executable(Vulkan-Engine ${SOURCE_FILES} ${INCLUDE_FILES})
 
-target_include_directories(vulkan-engine PRIVATE ${PROJECT_BINARY_DIR})
-target_include_directories(vulkan-engine PRIVATE ${CMAKE_SOURCE_DIR}/Include)
-target_include_directories(vulkan-engine PRIVATE ${Vulkan_INCLUDE_DIRS})
+target_link_libraries(Vulkan-Engine Vulkan::Vulkan)
+target_link_libraries(Vulkan-Engine SDL2::SDL2-static)
+
+target_include_directories(Vulkan-Engine PRIVATE ${PROJECT_BINARY_DIR})
+target_include_directories(Vulkan-Engine PRIVATE ${CMAKE_SOURCE_DIR}/Include)
+target_include_directories(Vulkan-Engine PRIVATE ${Vulkan_INCLUDE_DIRS})
